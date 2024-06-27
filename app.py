@@ -34,8 +34,54 @@ def delete_product(product_id):
         return jsonify({"message": "Product deleted successfully"})
     return jsonify({"message": "Product not found"}), 404
 
+@app.route('/api/products/<int:product_id>', methods=["GET"])
+def get_products_details(product_id):
+    product = Product.query.get(product_id)
+    if product:
+        return jsonify({
+            "id": product.id,
+            "name": product.name,
+            "price": product.price,
+            "description": product.description
+        })
+    return jsonify({"message": "Product not found"}), 404
 
-# Definir uma rota raiz (página inicial) e a função que será executada ao requisitar
+
+
+@app.route('/api/products/update/<int:product_id>', methods=["PUT"])
+def update_product(product_id):
+    product = Product.query.get(product_id)
+    if not product:
+        return jsonify({"message": "Product not found"}), 404
+    data = request.json
+    if 'name' in data:
+        product.name = data['name']
+
+    if 'price' in data:
+        product.price = data['price']
+
+    if 'description' in data:
+        product.description = data['description']
+
+    db.session.commit()
+    return jsonify({"message": "Product update successfully"})
+
+
+@app.route('/api/products', methods=["GET"])
+def get_products():
+    products = Product.query.all()
+    product_list = []
+    for product in products:
+        product_data = ({
+            "id": product.id,
+            "name": product.name,
+            "price": product.price,
+        })
+        product_list.append(product_data)
+    return jsonify(product_list)
+
+
+# 1 Definir uma rota raiz (página inicial) e a função que será executada ao requisitar
 @app.route('/')
 def hello_world():
     return 'Hello World'
